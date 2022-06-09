@@ -1,0 +1,75 @@
+body {
+    overflow: auto;
+}
+
+#editor-form {
+    float: left;
+}
+
+
+
+h1,
+h2 {
+    overflow: hidden;
+}
+
+#preview {
+    float: inline-start;
+    width: 60%;
+
+}
+
+.clear-unfix {
+    clear: both;
+}
+
+.float-right {
+    float: right;
+    padding: 5px;
+    background: #f4f4f4;
+}
+
+
+/* img {
+    float:right;
+    padding: 5px;
+} */
+
+/* .no-padding {
+    padding: 0;
+} */
+
+blockquote {
+    padding: 0 1em;
+    color: #6a737d;
+    border-left: .25em solid #dfe2e5;
+}
+
+code {
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 1.01rem;
+    background-color: rgba(27, 31, 35, .05);
+    border-radius: 3px;
+}
+
+pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 3px;
+}
+
+pre code {
+    display: inline;
+    max-width: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: initial;
+    border: 0;
+}
