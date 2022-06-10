@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,21 +8,35 @@
     <title>Editor</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <form id="editor-form">
-        <textarea name="editor" id="editor" cols="60" rows="30"></textarea>
-        <input type="submit" value="Show Preview">
-    </form>
 
-    
+<body>
+    <div class="container">
+        <div class="editor-container">
+            <div class="heading">
+                MARKDOWN
+            </div>
+            <textarea name="editor" id="editor"></textarea>
+            <input type="submit" value="Show Preview" id="show-markdown-btn" style="display:none">
+
+        </div>
+        <div class="preview-container">
+            <div class="heading">PREVIEW</div>
+            <div id="preview"></div>
+        </div>
+    </div>
+
+    <!-- <div id="editor-container">
+        <textarea id="editor" cols="30" rows="10"></textarea>
+    </div> -->
 
     <!-- <textarea name="preview" id="preview" cols="60" rows="30" readonly></textarea> -->
 
-    <div id="preview"></div>
+
 
     <div class="clear-unfix"></div>
-    
+
 
     <script src="main.js"></script>
 </body>
+
 </html>
