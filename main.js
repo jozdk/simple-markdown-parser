@@ -128,7 +128,7 @@ function parseMarkdown(mdText) {
 
     console.log(html)
 
-    let paragraph = /(^(?!<h2|<h1|<figure|<blockquote|<p|<ol|<ul|( {4,}|\t)|\n)[\S\s]+?(^\n|(?:(?!<blockquote>).)*)|^(?!<h2|<h1|<figure|<blockquote|<p|<ol|<ul|( {4,}|\t)|\n)[\S\s]+)/gm;
+    let paragraph = /(^(?!<h2|<h1|<figure|<blockquote|<p|<ol|<ul|( {4,}|\t)|\n)[\S\s]+?(?=<blockquote>|^\n)|^(?!<h2|<h1|<figure|<blockquote|<p|<ol|<ul|( {4,}|\t)|\n)[\S\s]+)/gm;
     // html = html.replace(paragraph, `<p>$1</p>\n`);
     html = html.replace(paragraph, (match) => {
         console.log("paragraph match: ", match);
