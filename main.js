@@ -50,17 +50,17 @@ function parseMarkdown(mdText) {
     let altH2 = /(.*)\n-{4,}$/gm;
     html = html.replace(altH2, "<h2 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h2>");
 
-    let bold = /\*\*(.*?)\*\*/gm;
+    let bold = /\*\*(.+?)\*\*/gm;
     html = html.replace(bold, "<b>$1</b>");
 
-    let italics = /\*(.*?)\*/gm;
+    let italics = /\*(.+?)\*/gm;
     html = html.replace(italics, "<i>$1</i>");
 
     let code = /`(.*?)`/gm;
     html = html.replace(code, "<code>$1</code>")
 
-    let linebreak = /^(?!>).* {2,}\n/gm;
-    html = html.replace(linebreak, "<br>");
+    // let linebreak = /(^(?!>).*?) {2,}\n/gm;
+    // html = html.replace(linebreak, "$1<br>");
 
     // [Link text](URL)
     let link = /(?<!!)\[(.*?)\]\((.*?)\)/gm;
@@ -81,57 +81,6 @@ function parseMarkdown(mdText) {
 
     // Blockquotes
     const blockquote = /(^>{1}[\S\s]*?(?=^(?!>))|^>{1}[\S\s]*)/gm;
-    // html = html.replace(blockquote, `<blockquote>$1</blockquote>`);
-    // html = html.replace(blockquote, (match) => {
-    //     console.log("blockquote match: ", match);
-    //     // const blockQuoteText = match.replace(/^>\s/, "").replace(/\n/gm, " ");
-    //     const blockQuoteText = match.replace(/\n(?!>)/gm, " ");
-    //     console.log("cleaned up blockquote match: ", blockQuoteText);
-    //     // let blockquoteWithParagraphs = blockQuoteText.replace(/(?<=^> )([\S\s]*?(?=^\n|^>(?! *\S)|>{2,}){1}|[\S\s>]*)/gm, (match) => {
-    //     //     const paragraphText = match.replace(/(?<!b|i|>)>/gm, "").trim().replace(/\n(?!>)/gm, "");
-    //     //     console.log("paragraph text: ", paragraphText)
-    //     //     // console.log("paragraph text inside quote: ", paragraphText);
-    //     //     if (paragraphText) {
-    //     //         return `<p>${paragraphText}</p>\n`;
-    //     //     } else {
-    //     //         return "";
-    //     //     }
-    //     // });
-    //     let blockquoteWithParagraphs2 = blockQuoteText;
-    //     let maxLoops = 0;
-    //     while (/(^>[\S\s]*?(?=^\n|^>(?! *\S)|>{2,}){1}|^>{1}[\S\s]*)/m.test(blockQuoteText)) {
-    //         if (maxLoops >= 100) break;
-    //         blockquoteWithParagraphs2 = blockquoteWithParagraphs2.replace(/(^>[\S\s]*?(?=^\n|^>(?! *\S)){1}|^>{1}[\S\s]*)/m, (match) => {
-    //             console.log("bq paragraph match: ", match)
-    //             const paragraphText = match.replace(/(?<!b|i|>)>/gm, "").trim().replace(/\n/gm, "");
-    //             console.log("bq paragraph text: ", paragraphText);
-    //             if (paragraphText) {
-    //                 return `<p>${paragraphText}</p>\n`;
-    //             } else {
-    //                 return "";
-    //             }
-    //         })
-    //         maxLoops++;
-    //     }
-    //     console.log("blockquote with paragraphs: ", blockquoteWithParagraphs2);
-    //     let max = 0;
-    //     // while (/(^>{1}[\S\s]*?(?=^(?!>))|^>{1}[\S\s]*)/gm.test(blockquoteWithParagraphs)) {
-    //     //     if (max >= 10) break;
-
-    //     //     blockquoteWithParagraphs = blockquoteWithParagraphs.replace(/(^>{1}[\S\s]*?(?=^(?!>))|^>{1}[\S\s]*)/gm, (match) => {
-    //     //         console.log("nested blockquote match: ", match);
-    //     //         console.log("nested blockquote: ", parseNestedBlockquotes(match));
-    //     //         return parseNestedBlockquotes(match);
-    //     //     });
-    //     //     max++;
-    //     // }
-
-    //     // console.log("blockquote text with paragraphs (hopefully): ", blockquoteWithParagraphs)
-    //     return (
-    //         `<blockquote>${blockquoteWithParagraphs2}</blockquote>\n`
-    //     );
-    // })
-
     html = html.replace(blockquote, (match) => {
         console.log("blockquote match: ", match);
         const blockQuoteText = match.replace(/^>{1}/gm, "").replace(/^ /gm, "");
@@ -201,7 +150,23 @@ function parseMarkdown(mdText) {
         console.log("paragraph match: ", match);
         const paragraphText = match.trim();
         console.log("paragraph text: ", paragraphText);
-        return `<p>${paragraphText}</p>\n`;
+        let linebreak = /(^(?!>).*?) {2,}\n/gm;
+        const paragraphWithLinebreaks = paragraphText.replace(linebreak, "$1<br>");
+        // let paragraph = paragraphWithLinebreaks;
+        // let bold = /\*\*(.+?)\*\*/gm;
+        // paragraph = paragraph.replace(bold, (match, text) => {
+        //     let boldText = text;
+        //     boldText = boldText.replace(/\*(.*?)\*/gm, "<i>$1</i>");
+        //     return `<b>${boldText}</b>`;
+        // })
+        // let italics = /\*(.+?)\*/gm;
+        // paragraph = paragraph.replace(italics, (match, text) => {
+        //     let italicText = text;
+        //     console.log("italic match: ", italicText);
+        //     italicText = italicText.replace(/\*\*(.*?)\*\*/gm, "<b>$1</b>");
+        //     return `<i>${italicText}</i>`;
+        // })
+        return `<p>${paragraphWithLinebreaks}</p>\n`;
     });
 
     // let codeBlock = /(^(?=( {4,}|\t))[\S\s]+?(?:(?!(\n<p>){1}).)*|^(?=( {4,}|\t))[\S\s]+)/gm
@@ -287,32 +252,6 @@ function parseMarkdown(mdText) {
 
 }
 
-function parseBlockquoteParagraphs(blockQuoteText) {
-    const blockquoteWithParagraphs = blockQuoteText.replace(/(^>[\S\s]*?(?=^\n|^>(?! *\S)|>{2,}){1}|^>{1}[\S\s]*)/m, (match) => {
-        const paragraphText = match.replace(/(?<!b|i|>)>/gm, "").trim().replace(/\n/gm, "");
-        if (paragraphText) {
-            return `<p>${paragraphText}</p>\n`;
-        } else {
-            return "";
-        }
-    })
-    return blockquoteWithParagraphs;
-}
-
-function parseNestedBlockquotes(blockQuoteText) {
-    const blockquoteWithParagraphs = blockQuoteText.replace(/(^>[\S\s]*?(?=^\n|^>(?! *\S)|>{2,}){1}|^>{1}[\S\s]*)/gm, (match) => {
-        const paragraphText = match.replace(/(?<!b|i|>)>/gm, "").trim().replace(/\n(?!>)/gm, "");
-        console.log("parsing nested blockquote paragraphs: ", paragraphText)
-        // console.log("paragraph text inside quote: ", paragraphText);
-        if (paragraphText) {
-            return `<p>${paragraphText}</p>\n`;
-        } else {
-            return "";
-        }
-    });
-    console.log("nested blockquote with paragraphs: ", blockquoteWithParagraphs);
-    return `<blockquote>${blockquoteWithParagraphs}</blockquote>\n`;
-}
 
 // editorForm.addEventListener("submit", (e) => {
 //     e.preventDefault();
