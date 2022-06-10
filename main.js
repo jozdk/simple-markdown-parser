@@ -1,6 +1,7 @@
 const editor = document.querySelector("#editor");
 const preview = document.querySelector("#preview");
 const editorForm = document.querySelector("#editor-form");
+const submitButton = document.querySelector("#show-markdown-btn");
 
 
 function parseMarkdown(mdText) {
@@ -100,9 +101,10 @@ function parseMarkdown(mdText) {
     })
 
     // Ordered list
-    let orderedList = /\d\. [\S\s]+?(?=^\n|^- |^ {4,}|\t)|\d\. [\S\s]+/gm;
+    let orderedList = /\d\.[\S\s]*?(?=^\n|^- |^ {4,}|\t)|\d\.[\S\s]*/gm;
     html = html.replace(orderedList, (match) => {
-        const matches = match.match(/(?<=\d\. )[\s\S]+?(?=\n(?=\d\.))|(?<=\d\. )[\s\S]+/gm);
+        const matches = match.match(/(?<=\d\.)[\s\S]+?(?=\n(?=\d\.))|(?<=\d\.)[\s\S]*/gm);
+        console.log(matches);
         let listItems = "";
         matches.forEach((item) => {
             const itemClean = item.replace(/\n/gm, " ");
@@ -115,7 +117,7 @@ function parseMarkdown(mdText) {
     let unorderedList = /- [\S\s]+?(?=^\n|^<ol>|^ {4,}|\t)|- [\S\s]+/gm;
     html = html.replace(unorderedList, (match) => {
         console.log("unordered list match: ", match);
-        const matches = match.match(/(?<=- )[\s\S]+?(?=\n(?=-))|(?<=- )[\s\S]+/gm);
+        const matches = match.match(/(?<=-)[\s\S]+?(?=\n(?=-))|(?<=-)[\s\S]*/gm);
         let listItems = "";
         matches.forEach((item) => {
             const cleanItem = item.replace(/\n/gm, " ");
@@ -218,10 +220,18 @@ function parseMarkdown(mdText) {
 
 }
 
-editorForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    parseMarkdown(editor.value)
-});
+// editorForm.addEventListener("submit", (e) => {
+//     e.preventDefault();
+//     parseMarkdown(editor.value)
+// });
+
+submitButton.addEventListener("click", () => {
+    parseMarkdown(editor.value);
+})
+
+editor.addEventListener("input", (event) => {
+    parseMarkdown(event.target.value)
+})
 
 
 /*let re = /##\s(\w.*)\n/ */
