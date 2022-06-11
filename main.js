@@ -50,21 +50,61 @@ function parseMarkdown(mdText) {
     let altH2 = /(.*)\n-{4,}$/gm;
     html = html.replace(altH2, "<h2 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h2>");
 
-    let bold = /\*\*(.+?)\*\*/gm;
-    html = html.replace(bold, "<b>$1</b>");
+    // Exclude code blocks from inline elements search
+    // html = html.replace(/^(?! {4,})(.*)/gm, (match, lineText) => {
+    //     let bold = /\*\*(.+?)\*\*/gm;
+    //     lineText = lineText.replace(bold, "<b>$1</b>");
 
-    let italics = /\*(.+?)\*/gm;
-    html = html.replace(italics, "<i>$1</i>");
+    //     let bold2 = /__(.+?)__/gm;
+    //     lineText = lineText.replace(bold2, "<b>$1</b>");
 
-    let code = /`(.*?)`/gm;
-    html = html.replace(code, "<code>$1</code>")
+    //     let italics = /\*(.+?)\*/gm;
+    //     lineText = lineText.replace(italics, "<i>$1</i>");
+
+    //     let italics2 = /_(.+?)_/gm;
+    //     lineText = lineText.replace(italics2, "<i>$1</i>");
+
+    //     let strikethrough = /~~(.+?)~~/gm;
+    //     lineText = lineText.replace(strikethrough, "<s>$1</s>");
+
+    //     let code = /`(.*?)`/gm;
+    //     lineText = lineText.replace(code, (match, group) => {
+    //         group = group.replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
+    //         return `<code>${group}</code>`
+    //     });
+
+    //     // console.log("line text: ", lineText);
+    //     return lineText;
+    // })
+
+    // console.log("html with line replacement:\n", html);
+
+    // let code = /`(.*?)`/gm;
+    // html = html.replace(code, (match, group) => {
+    //     group = group.replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
+    //     return `<code>${group}</code>`
+    // });
+
+    // let bold = /\*\*(.+?)\*\*/gm;
+    // html = html.replace(bold, "<b>$1</b>");
+
+    // let bold2 = /__(.+?)__/gm;
+    // html = html.replace(bold2, "<b>$1</b>");
+
+    // let italics = /\*(.+?)\*/gm;
+    // html = html.replace(italics, "<i>$1</i>");
+
+    // let italics2 = /_(.+?)_/gm;
+    // html = html.replace(italics2, "<i>$1</i>");
+
+    // let strikethrough = /~~(.+?)~~/gm;
+    // html = html.replace(strikethrough, "<s>$1</s>");
+
 
     // let linebreak = /(^(?!>).*?) {2,}\n/gm;
     // html = html.replace(linebreak, "$1<br>");
 
-    // [Link text](URL)
-    let link = /(?<!!)\[(.*?)\]\((.*?)\)/gm;
-    html = html.replace(link, "<a href='$2'>$1</a>");
+
 
     // [Linktext/URL in eins]
     // let link = /\[(.*?)\]/gim;
@@ -78,7 +118,9 @@ function parseMarkdown(mdText) {
     //html = html.replace(image, "<figure class='float-right'><img src='$2' alt='$1'></figure>");
     html = html.replace(image, "<img src='$2' alt='$1'>")
 
-
+    // [Link text](URL)
+    let link = /(?<!!)\[(.*?)\]\((.*?)\)/gm;
+    html = html.replace(link, "<a href='$2'>$1</a>");
 
     // Blockquotes
     const blockquote = /(^>{1}[\S\s]*?(?=^(?!>))|^>{1}[\S\s]*)/gm;
@@ -143,32 +185,47 @@ function parseMarkdown(mdText) {
         return `<ul>${listItems}</ul>\n`;
     })
 
-    console.log(html)
+    // console.log(html)
 
-    let paragraph = /(^(?!<h2|<h1|<figure|<blockquote|<\/blockquote>|<p|<ol|<ul|( {4,}|\t)|\n)[\S\s]+?(?=<blockquote>|^\n)|^(?!<h2|<h1|<figure|<blockquote|<\/blockquote>|<p|<ol|<ul|( {4,}|\t)|\n)[\S\s]+)/gm;
+    let paragraph = /(^(?!<h2|<h1|<h3|<h4|<h5|<h6|<figure|<blockquote|<\/blockquote>|<p|<ol|<ul|( {4,}|\t)| *\n)[\S\s]+?(?=<blockquote>|^ *\n)|^(?!<h2|<h1|<h3|<h4|<h5|<h6|<figure|<blockquote|<\/blockquote>|<p|<ol|<ul|( {4,}|\t)| *\n)[\S\s]+)/gm;
     // html = html.replace(paragraph, `<p>$1</p>\n`);
     html = html.replace(paragraph, (match) => {
         console.log("paragraph match: ", match);
-        const paragraphText = match.trim();
-        console.log("paragraph text: ", paragraphText);
         let linebreak = /(^(?!>).*?) {2,}\n/gm;
-        const paragraphWithLinebreaks = paragraphText.replace(linebreak, "$1<br>");
-        // let paragraph = paragraphWithLinebreaks;
-        // let bold = /\*\*(.+?)\*\*/gm;
-        // paragraph = paragraph.replace(bold, (match, text) => {
-        //     let boldText = text;
-        //     boldText = boldText.replace(/\*(.*?)\*/gm, "<i>$1</i>");
-        //     return `<b>${boldText}</b>`;
-        // })
-        // let italics = /\*(.+?)\*/gm;
-        // paragraph = paragraph.replace(italics, (match, text) => {
-        //     let italicText = text;
-        //     console.log("italic match: ", italicText);
-        //     italicText = italicText.replace(/\*\*(.*?)\*\*/gm, "<b>$1</b>");
-        //     return `<i>${italicText}</i>`;
-        // })
-        return `<p>${paragraphWithLinebreaks}</p>\n`;
+        const paragraphWithLinebreaks = match.replace(linebreak, "$1<br>");
+        console.log("paragraph with linebreaks: ", paragraphWithLinebreaks)
+
+        const paragraphClean = paragraphWithLinebreaks.trim().replace(/\n/gm, " ");
+        console.log("p clean: ", paragraphClean);
+        
+        return `<p>${paragraphClean}</p>\n`;
     });
+
+    html = html.replace(/^(?! {4,})(.*)/gm, (match, lineText) => {
+        let bold = /\*\*(.+?)\*\*/gm;
+        lineText = lineText.replace(bold, "<b>$1</b>");
+
+        let bold2 = /__(.+?)__/gm;
+        lineText = lineText.replace(bold2, "<b>$1</b>");
+
+        let italics = /\*(.+?)\*/gm;
+        lineText = lineText.replace(italics, "<i>$1</i>");
+
+        let italics2 = /_(.+?)_/gm;
+        lineText = lineText.replace(italics2, "<i>$1</i>");
+
+        let strikethrough = /~~(.+?)~~/gm;
+        lineText = lineText.replace(strikethrough, "<s>$1</s>");
+
+        let code = /`(.*?)`/gm;
+        lineText = lineText.replace(code, (match, group) => {
+            group = group.replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
+            return `<code>${group}</code>`
+        });
+
+        // console.log("line text: ", lineText);
+        return lineText;
+    })
 
     // let codeBlock = /(^(?=( {4,}|\t))[\S\s]+?(?:(?!(\n<p>){1}).)*|^(?=( {4,}|\t))[\S\s]+)/gm
     let codeblock = /(^(?:( {4,}|\t))[\S\s]+?(?=\n<p>)|^(?:( {4,}|\t))[\S\s]+)/gm;
@@ -185,6 +242,13 @@ function parseMarkdown(mdText) {
     // })
 
 
+
+    // let emptyLine = /^ *\n/gm;
+    // html = html.replace(emptyLine, "");
+
+    // console.log("cleaned up (hopefully):\n", html);
+
+    
 
 
 
