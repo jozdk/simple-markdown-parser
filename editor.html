@@ -10,18 +10,25 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="editor-container">
-            <div class="heading">
-                MARKDOWN
+    <div id="wrapper">
+        <header>
+            <div>
+                Markdown Previewer
             </div>
-            <textarea name="editor" id="editor"></textarea>
-            <input type="submit" value="Show Preview" id="show-markdown-btn" style="display:none">
-
-        </div>
-        <div class="preview-container">
-            <div class="heading">PREVIEW</div>
-            <div id="preview"></div>
+        </header>
+        <div class="container">
+            <div class="editor-container">
+                <div style="border-right: 1px solid lightgray" class="heading">
+                    MARKDOWN
+                </div>
+                <textarea name="editor" id="editor"></textarea>
+                <!-- <input type="submit" value="Show Preview" id="show-markdown-btn" style="display:none"> -->
+    
+            </div>
+            <div class="preview-container">
+                <div class="heading">PREVIEW</div>
+                <div id="preview"></div>
+            </div>
         </div>
     </div>
 

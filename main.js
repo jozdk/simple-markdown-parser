@@ -1,7 +1,7 @@
 const editor = document.querySelector("#editor");
 const preview = document.querySelector("#preview");
 const editorForm = document.querySelector("#editor-form");
-const submitButton = document.querySelector("#show-markdown-btn");
+// const submitButton = document.querySelector("#show-markdown-btn");
 
 
 function parseMarkdown(mdText) {
@@ -75,7 +75,8 @@ function parseMarkdown(mdText) {
     html = html.replace(imageWithCaption, "<figure class='float-right'><img src='$3' alt='$1'></img><figcaption>$2</figcaption></figure>");
 
     let image = /!\[(.*?)\]\((.*?)\)/gm;
-    html = html.replace(image, "<figure class='float-right'><img src='$2' alt='$1'></figure>");
+    //html = html.replace(image, "<figure class='float-right'><img src='$2' alt='$1'></figure>");
+    html = html.replace(image, "<img src='$2' alt='$1'>")
 
 
 
@@ -117,7 +118,7 @@ function parseMarkdown(mdText) {
     })
 
     // Ordered list
-    let orderedList = /\d\.[\S\s]*?(?=^\n|^- |^ {4,}|\t)|\d\.[\S\s]*/gm;
+    let orderedList = /\d\.[\S\s]*?(?=^ *\n|^- |^ {4,}|\t)|\d\.[\S\s]*/gm;
     html = html.replace(orderedList, (match) => {
         const matches = match.match(/(?<=\d\.)[\s\S]+?(?=\n(?=\d\.))|(?<=\d\.)[\s\S]*/gm);
         console.log(matches);
@@ -130,7 +131,7 @@ function parseMarkdown(mdText) {
     })
 
     // Unordered list
-    let unorderedList = /- [\S\s]+?(?=^\n|^<ol>|^ {4,}|\t)|- [\S\s]+/gm;
+    let unorderedList = /- [\S\s]+?(?=^ *\n|^<ol>|^ {4,}|\t)|- [\S\s]+/gm;
     html = html.replace(unorderedList, (match) => {
         console.log("unordered list match: ", match);
         const matches = match.match(/(?<=-)[\s\S]+?(?=\n(?=-))|(?<=-)[\s\S]*/gm);
@@ -258,9 +259,9 @@ function parseMarkdown(mdText) {
 //     parseMarkdown(editor.value)
 // });
 
-submitButton.addEventListener("click", () => {
-    parseMarkdown(editor.value);
-})
+// submitButton.addEventListener("click", () => {
+//     parseMarkdown(editor.value);
+// })
 
 editor.addEventListener("input", (event) => {
     parseMarkdown(event.target.value)

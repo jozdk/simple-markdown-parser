@@ -2,30 +2,30 @@
     box-sizing: border-box;
 }
 
-body, html {
+body {
     height: 100vh;
     width: 100%;
     margin: 0;
-    box-sizing:border-box;
-    font-size: 15px;
+    box-sizing: border-box;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-y: hidden;
 }
 
-#editor-form {
-    float: left;
+#wrapper {
+    height: 100%;
 }
-
-
 
 h1,
 h2 {
     overflow: hidden;
 }
 
-#preview {
+/* #preview {
     float: inline-start;
     width: 60%;
 
-}
+} */
 
 .clear-unfix {
     clear: both;
@@ -38,42 +38,59 @@ h2 {
 }
 
 
-
+header {
+    padding: 15px;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    text-align: center;
+}
 
 .container {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 53px);
     display: flex;
 }
 
 .editor-container {
-    width: 50%;
-    
+    width: 49.9%;
+    overflow-y: auto;
+
     /* background-color: aliceblue; */
 }
 
 .preview-container {
-    width: 50%;
-    
+    width: 49.9%;
+    overflow-y: auto;
     /* background-color: antiquewhite; */
 }
 
 #editor {
-    border: 1px solid gray;
+    /* border-right: 1px solid gray; */
+    border: 0;
+    /* border-right: 10px solid rgb(232, 232, 232); */
+    border-top: 1px solid lightgray;
     width: 100%;
-    height: 95%;
+    height: calc(100% - 52px);
     padding: 10px;
-    font-size: 1rem;
+    font-size: 15px;
+    font-family: monospace;
+    outline: none;
 }
 
 .heading {
-    height: 4.6%;
+    padding: 15px;
+    text-align: center;
+    color: gray;
+    /* border-bottom: 1px solid black; */
 }
 
 #preview {
-    border: 1px solid gray;
+    border-top: 1px solid lightgray;
+    border-left: 10px solid rgb(232, 232, 232); 
+    /* border-left: 1px solid gray; */
     width: 100%;
-    height: 95%;
+    height: calc(100% - 49px);
     padding: 10px;
     font-size: 1rem;
 }
@@ -102,6 +119,10 @@ pre {
 }
 
 pre code {
+    font-size: 100%;
+    word-break: normal;
+    white-space: pre;
+    background: transparent;
     display: inline;
     max-width: auto;
     padding: 0;
