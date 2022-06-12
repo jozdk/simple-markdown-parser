@@ -17,25 +17,25 @@ function parseMarkdown(mdText) {
     // preview.innerHTML = html;
 
 
-    let h1 = /^#\s(.*)$/gm;
+    let h1 = /^ {0,3}#\s(.*)$/gm;
     //console.log(mdText.match(h1), mdText.match(h1)[1]);
     let html = mdText.replace(h1, "<h1>$1</h1>");
 
     //preview.innerHTML = html;
 
-    let h2 = /^##\s(.*)$/gm;
+    let h2 = /^ {0,3}##\s(.*)$/gm;
     html = html.replace(h2, "<h2>$1</h2>");
 
-    let h3 = /^###\s(.*)$/gm;
+    let h3 = /^ {0,3}###\s(.*)$/gm;
     html = html.replace(h3, "<h3>$1</h3>");
 
-    const h4 = /^####\s(.*)$/gm;
+    const h4 = /^ {0,3}####\s(.*)$/gm;
     html = html.replace(h4, "<h4>$1</h4>");
 
-    const h5 = /^#####\s(.*)$/gm;
+    const h5 = /^ {0,3}#####\s(.*)$/gm;
     html = html.replace(h5, "<h5>$1</h5>");
 
-    const h6 = /^######\s(.*)$/gm;
+    const h6 = /^ {0,3}######\s(.*)$/gm;
     html = html.replace(h6, "<h6>$1</h6>");
 
     // let altH1 = /(.*)\n={4,}$/gim
@@ -160,14 +160,48 @@ function parseMarkdown(mdText) {
     })
 
     // Ordered list
-    let orderedList = /\d\.[\S\s]*?(?=^ *\n|^- |^ {4,}|\t)|\d\.[\S\s]*/gm;
+    let orderedList = /^ {0,3}\d\.[\S\s]*?(?=^ *[^\d\s]|^- )|^ {0,3}\d\.[\S\s]*/gm;
     html = html.replace(orderedList, (match) => {
-        const matches = match.match(/(?<=\d\.)[\s\S]+?(?=\n(?=\d\.))|(?<=\d\.)[\s\S]*/gm);
-        console.log(matches);
+        // const listBody = match.replace(/^ {3}/gm, "");
+        // console.log("whole list body:", listBody);
+        //const listItemMatches = match.match(/(?<=\d\.)[\s\S]+?(?=\n(?=\d\. +))|(?<=\d\.)[\s\S]+/gm);
+        // const listBody = match.replace(/^ {0,3}/gm, "");
+        // console.log("list body: ", listBody.replace(/ /gm, "_"))
+        console.log("ordered list match:", match);
+        const listItemMatches = match.match(/(?:^ {0,2}\d\. {1,})[\s\S]*?(?=\n(?= {0,2}\d\. +))|(?:^ {0,2}\d\. {1,})[\s\S]*/gm);
+        console.log(listItemMatches);
         let listItems = "";
-        matches.forEach((item) => {
-            const itemClean = item.replace(/\n/gm, " ");
-            listItems += `<li>${itemClean}</li>`
+        listItemMatches.forEach((item) => {
+            console.log("list item match:", item.replace(/ /gm, "_"))
+            const itemClean = item.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d. +/g, "");
+            console.log("list item clean:", itemClean);
+            let itemWithNestedList = itemClean;
+            let loops = 0;
+            while (/(?:^ {3,}|\t)\d\. +[\s\S]+?(?=\n(?=\d\.)|<\/li>)|(?:^ {3,}|\t)\d\. +[\s\S]+/m.test(itemWithNestedList)) {
+                if (loops >= 50) break;
+                itemWithNestedList = itemWithNestedList.replace(/(?:^ {3,}|\t)\d\. +[\s\S]+?(?=\n(?=\d\.)|<\/li>)|(?:^ {3,}|\t)\d\. +[\s\S]+/m, (match) => {
+                    console.log("nested list match:", match.replace(/ /gm, "_"));
+                    const nestedListBody = match.replace(/^ {0,3}/gm, "");
+                    console.log("nested list body:", nestedListBody.replace(/ /gm, "_"));
+                    //const nestedListItemMatches = nestedListBody.match(/(?<=\d\.)[\s\S]+?(?=\n(?=\d\. +))|(?<=\d\.)[\s\S]+/gm);
+                    const nestedListItemMatches = nestedListBody.match(/(?:^ {0,2}\d\. {1,})[\s\S]*?(?=\n(?= {0,2}\d\. +))|(?:^ {0,2}\d\. {1,})[\s\S]*/gm);
+                    let nestedListItems = "";
+                    
+                    nestedListItemMatches.forEach((nestedListItem) => {
+                        console.log("nested list item", nestedListItem.replace(/ /gm, "_"));
+                        const nestedListItemClean = nestedListItem.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d. +/g, "");
+                        console.log("nested list item clean: ", nestedListItemClean.replace(/ /gm, "_"));
+                        nestedListItems += `<li>${nestedListItemClean}</li>`;
+                    });
+                    return `<ol>${nestedListItems}</ol>`;
+                })
+
+                // itemWithNestedList = `<ol>${nestedListItems}</ol>`;
+
+                loops++;
+            }
+            
+            listItems += `<li>${itemWithNestedList}</li>`;
         });
         return `<ol>${listItems}</ol>\n`
     })
