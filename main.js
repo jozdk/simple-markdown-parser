@@ -160,7 +160,7 @@ function parseMarkdown(mdText) {
     })
 
     // Ordered list
-    let orderedList = /^\d\.[\S\s]*?(?=^\n^(?!( *\d\.| *\n))|^- )|^\d\.[\S\s]*/gm;
+    let orderedList = /^\d\.[\S\s]*?(?=^ *\n^(?!( *\d\.| *\n))|^- )|^\d\.[\S\s]*/gm;
     html = html.replace(orderedList, (match) => {
         // const listBody = match.replace(/^ {3}/gm, "");
         // console.log("whole list body:", listBody);
@@ -173,7 +173,7 @@ function parseMarkdown(mdText) {
         let listItems = "";
         listItemMatches.forEach((item) => {
             console.log("list item match:", item.replace(/ /gm, "_"))
-            const itemClean = item.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d. +/g, "");
+            const itemClean = item.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d\. +/g, "");
             console.log("list item clean:", itemClean.replace(/ /gm, "_"));
             let itemWithNestedList = itemClean;
             let loops = 0;
@@ -189,7 +189,7 @@ function parseMarkdown(mdText) {
                     
                     nestedListItemMatches.forEach((nestedListItem) => {
                         console.log("nested list item", nestedListItem.replace(/ /gm, "_"));
-                        const nestedListItemClean = nestedListItem.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d. +/g, "");
+                        const nestedListItemClean = nestedListItem.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d\. +/g, "");
                         console.log("nested list item clean: ", nestedListItemClean.replace(/ /gm, "_"));
                         nestedListItems += `<li>${nestedListItemClean}</li>`;
                     });
@@ -207,14 +207,39 @@ function parseMarkdown(mdText) {
     })
 
     // Unordered list
-    let unorderedList = /^- [\S\s]+?(?=^ *\n|^<ol>|^ {4,}|\t)|^- [\S\s]+/gm;
+    let unorderedList = /^- [\S\s]*?(?=^ *\n^(?!( *- | *\n))|^\d\. )|^- [\S\s]*/gm;
     html = html.replace(unorderedList, (match) => {
         console.log("unordered list match: ", match);
-        const matches = match.match(/(?<=-)[\s\S]+?(?=\n(?=-))|(?<=-)[\s\S]*/gm);
+        const listItemMatches = match.match(/(?:^ {0,1}- +)[\s\S]*?(?=\n(?=^ {0,1}- +))|(?:^ {0,1}- +)[\s\S]*/gm);
+        console.log(listItemMatches);
         let listItems = "";
-        matches.forEach((item) => {
-            const cleanItem = item.replace(/\n/gm, " ");
-            listItems += `<li>${cleanItem}</li>`
+        listItemMatches.forEach((item) => {
+            console.log("list item match:", item.replace(/ /gm, "_"));
+            const itemClean = item.replace(/\n(?! {2,}- +)/gm, " ").replace(/^ {0,1}- +/g, "");
+            console.log("list item clean:", itemClean.replace(/ /gm, "_"));
+            let itemWithNestedList = itemClean;
+            let loops = 0;
+            while (/(?:^ {2,}|\t)- +[\s\S]+?(?=\n(?=- )|<\/li>)|(?:^ {2,}|\t)- +[\s\S]+/m.test(itemWithNestedList)) {
+                if (loops >= 50) break;
+                itemWithNestedList = itemWithNestedList.replace(/(?:^ {2,}|\t)- +[\s\S]+?(?=\n(?=- )|<\/li>)|(?:^ {2,}|\t)- +[\s\S]+/m, (match) => {
+                    console.log("nested list match:", match.replace(/ /gm, "_"));
+                    const nestedListBody = match.replace(/^ {0,2}/gm, "");
+                    console.log("nested list body:", nestedListBody.replace(/ /gm, "_"));
+                    const nestedListItemMatches = nestedListBody.match(/(?:^ {0,1}- +)[\s\S]*?(?=\n(?=^ {0,1}- +))|(?:^ {0,1}- +)[\s\S]*/gm);
+                    let nestedListItems = "";
+                    
+                    nestedListItemMatches.forEach((nestedListItem) => {
+                        console.log("nested list item:", nestedListItem.replace(/ /gm, "_"));
+                        const nestedListItemClean = nestedListItem.replace(/\n(?! {2,}- +)/gm, " ").replace(/^ {0,1}- +/g, "");
+                        console.log("nested list item clean:", nestedListItemClean.replace(/ /gm, "_"));
+                        nestedListItems += `<li>${nestedListItemClean}</li>`;
+                    });
+
+                    return `<ul>${nestedListItems}</ul>`;
+                })
+                loops++;
+            }
+            listItems += `<li>${itemWithNestedList}</li>`;
         });
         return `<ul>${listItems}</ul>\n`;
     })
