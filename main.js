@@ -160,7 +160,7 @@ function parseMarkdown(mdText) {
     })
 
     // Ordered list
-    let orderedList = /^ {0,3}\d\.[\S\s]*?(?=^ *[^\d\s]|^- )|^ {0,3}\d\.[\S\s]*/gm;
+    let orderedList = /^\d\.[\S\s]*?(?=^\n^(?!( *\d\.| *\n))|^- )|^\d\.[\S\s]*/gm;
     html = html.replace(orderedList, (match) => {
         // const listBody = match.replace(/^ {3}/gm, "");
         // console.log("whole list body:", listBody);
@@ -168,13 +168,13 @@ function parseMarkdown(mdText) {
         // const listBody = match.replace(/^ {0,3}/gm, "");
         // console.log("list body: ", listBody.replace(/ /gm, "_"))
         console.log("ordered list match:", match);
-        const listItemMatches = match.match(/(?:^ {0,2}\d\. {1,})[\s\S]*?(?=\n(?= {0,2}\d\. +))|(?:^ {0,2}\d\. {1,})[\s\S]*/gm);
+        const listItemMatches = match.match(/(?:^ {0,2}\d\. +)[\s\S]*?(?=\n(?=^ {0,2}\d\. +))|(?:^ {0,2}\d\. +)[\s\S]*/gm);
         console.log(listItemMatches);
         let listItems = "";
         listItemMatches.forEach((item) => {
             console.log("list item match:", item.replace(/ /gm, "_"))
             const itemClean = item.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d. +/g, "");
-            console.log("list item clean:", itemClean);
+            console.log("list item clean:", itemClean.replace(/ /gm, "_"));
             let itemWithNestedList = itemClean;
             let loops = 0;
             while (/(?:^ {3,}|\t)\d\. +[\s\S]+?(?=\n(?=\d\.)|<\/li>)|(?:^ {3,}|\t)\d\. +[\s\S]+/m.test(itemWithNestedList)) {
@@ -207,7 +207,7 @@ function parseMarkdown(mdText) {
     })
 
     // Unordered list
-    let unorderedList = /- [\S\s]+?(?=^ *\n|^<ol>|^ {4,}|\t)|- [\S\s]+/gm;
+    let unorderedList = /^- [\S\s]+?(?=^ *\n|^<ol>|^ {4,}|\t)|^- [\S\s]+/gm;
     html = html.replace(unorderedList, (match) => {
         console.log("unordered list match: ", match);
         const matches = match.match(/(?<=-)[\s\S]+?(?=\n(?=-))|(?<=-)[\s\S]*/gm);
@@ -262,7 +262,7 @@ function parseMarkdown(mdText) {
     })
 
     // let codeBlock = /(^(?=( {4,}|\t))[\S\s]+?(?:(?!(\n<p>){1}).)*|^(?=( {4,}|\t))[\S\s]+)/gm
-    let codeblock = /(^(?:( {4,}|\t))[\S\s]+?(?=\n<p>)|^(?:( {4,}|\t))[\S\s]+)/gm;
+    let codeblock = /(^(?:( {4,}|\t))[\S\s]+?(?=\n<p>|<h2|<h1|<h3|<h4|<h5|<h6|<figure|<blockquote|<\/blockquote>|<ol|<ul|^ *\n)|^(?:( {4,}|\t))[\S\s]+)/gm;
     html = html.replace(codeblock, (match) => {
         console.log("codeblock match: ", match);
         const trimmedMatch = match.replace(/ {4,}|\t/gm, "");
