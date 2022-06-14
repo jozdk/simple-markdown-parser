@@ -8,8 +8,8 @@ const h3 = /^ {0,3}###\s(.*)$/gm;
 const h4 = /^ {0,3}####\s(.*)$/gm;
 const h5 = /^ {0,3}#####\s(.*)$/gm;
 const h6 = /^ {0,3}######\s(.*)$/gm;
-const altH1 = /(.*)\n={1,} *$/gm;
-const altH2 = /(.*)\n-{1,} *$/gm;
+const altH1 = /(\w+)\n={1,} *$/gm;
+const altH2 = /(\w+)\n-{1,} *$/gm;
 
 // const horizontalRule = /^(?:-|\*|_){3,}? *$/gm;
 
