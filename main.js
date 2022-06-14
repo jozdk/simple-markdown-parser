@@ -8,8 +8,10 @@ const h3 = /^ {0,3}###\s(.*)$/gm;
 const h4 = /^ {0,3}####\s(.*)$/gm;
 const h5 = /^ {0,3}#####\s(.*)$/gm;
 const h6 = /^ {0,3}######\s(.*)$/gm;
-const altH1 = /(.*)\n={4,}$/gm
-const altH2 = /(.*)\n-{4,}$/gm;
+const altH1 = /(.*)\n={1,} *$/gm;
+const altH2 = /(.*)\n-{1,} *$/gm;
+
+// const horizontalRule = /^(?:-|\*|_){3,}? *$/gm;
 
 // Image + Link
 const image = /!\[(.*?)\]\((.*?)\)/gm;
@@ -21,7 +23,7 @@ const link = /(?<!!)\[(.*?)\]\((.*?)\)/gm;
 const blockquote = /(^>{1}[\S\s]*?(?=^(?!>))|^>{1}[\S\s]*)/gm;
 
 // Ordered list
-const orderedList = /^\d\.[\S\s]*?(?=^ *\n^(?!( *\d\.| *\n))|^- )|^\d\.[\S\s]*/gm;
+const orderedList = /^\d\. [\S\s]*?(?=^ *\n^(?!( *\d\.| *\n))|^- )|^\d\. [\S\s]*/gm;
 
 // Unordered list
 const unorderedList = /^- [\S\s]*?(?=^ *\n^(?!( *- | *\n))|^\d\. )|^- [\S\s]*/gm;
@@ -61,8 +63,15 @@ function parseMarkdown(mdText) {
         .replace(h4, "<h4>$1</h4>")
         .replace(h5, "<h5>$1</h5>")
         .replace(h6, "<h6>$1</h6>")
-        .replace(altH1, "<h1 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h1>")
-        .replace(altH2, "<h2 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h2>");
+        .replace(altH1, "<h1>$1</h1>")
+        .replace(altH2, "<h2>$1</h2>");
+
+        // H1 and H2 with underlining
+        // .replace(h1, "<h1 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h1>")
+        // .replace(h2, "<h2 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h2>");
+    
+    // html = html.replace(horizontalRule, "<hr>");
+    // First add to negative lookahead in paragraph, codeblock etc.
 
     // Link + Image
     html = html.replace(image, "<img src='$2' alt='$1'>");
@@ -116,7 +125,7 @@ function parseMarkdown(mdText) {
         let listItems = "";
         listItemMatches.forEach((item) => {
             // console.log("list item match:", item.replace(/ /gm, "_"))
-            const itemClean = item.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d\. +/g, "");
+            const itemClean = item.replace(/\n(?!(?: {3,}|\t*)\d\. +)/gm, " ").replace(/^ {0,2}\d\. +/g, "");
             // console.log("list item clean:", itemClean.replace(/ /gm, "_"));
             let itemWithNestedList = itemClean;
             let loops = 0;
@@ -124,14 +133,14 @@ function parseMarkdown(mdText) {
                 if (loops >= 50) break;
                 itemWithNestedList = itemWithNestedList.replace(/(?:^ {3,}|\t)\d\. +[\s\S]+?(?=\n(?=\d\.)|<\/li>)|(?:^ {3,}|\t)\d\. +[\s\S]+/m, (match) => {
                     // console.log("nested list match:", match.replace(/ /gm, "_"));
-                    const nestedListBody = match.replace(/^ {0,3}/gm, "");
-                    // console.log("nested list body:", nestedListBody.replace(/ /gm, "_"));
+                    const nestedListBody = match.replace(/^ {0,3}/gm, "").replace(/^\t/gm, "");
+                    // console.log("nested list body:", nestedListBody.replace(/\t/gm, "_"));
                     const nestedListItemMatches = nestedListBody.match(/(?:^ {0,2}\d\. {1,})[\s\S]*?(?=\n(?= {0,2}\d\. +))|(?:^ {0,2}\d\. {1,})[\s\S]*/gm);
                     let nestedListItems = "";
                     
                     nestedListItemMatches.forEach((nestedListItem) => {
                         // console.log("nested list item", nestedListItem.replace(/ /gm, "_"));
-                        const nestedListItemClean = nestedListItem.replace(/\n(?! {3,}\d\. +)/gm, " ").replace(/^ {0,2}\d\. +/g, "");
+                        const nestedListItemClean = nestedListItem.replace(/\n(?!(?: {3,}|\t*)\d\. +)/gm, " ").replace(/^ {0,2}\d\. +/g, "");
                         // console.log("nested list item clean: ", nestedListItemClean.replace(/ /gm, "_"));
                         nestedListItems += `<li>${nestedListItemClean}</li>`;
                     });
@@ -154,22 +163,22 @@ function parseMarkdown(mdText) {
         let listItems = "";
         listItemMatches.forEach((item) => {
             // console.log("list item match:", item.replace(/ /gm, "_"));
-            const itemClean = item.replace(/\n(?! {2,}- +)/gm, " ").replace(/^ {0,1}- +/g, "");
+            const itemClean = item.replace(/\n(?!(?: {2,}|\t*)- +)/gm, " ").replace(/^ {0,1}- +/g, "");
             // console.log("list item clean:", itemClean.replace(/ /gm, "_"));
             let itemWithNestedList = itemClean;
             let loops = 0;
             while (/(?:^ {2,}|\t)- +[\s\S]+?(?=\n(?=- )|<\/li>)|(?:^ {2,}|\t)- +[\s\S]+/m.test(itemWithNestedList)) {
                 if (loops >= 50) break;
                 itemWithNestedList = itemWithNestedList.replace(/(?:^ {2,}|\t)- +[\s\S]+?(?=\n(?=- )|<\/li>)|(?:^ {2,}|\t)- +[\s\S]+/m, (match) => {
-                    // console.log("nested list match:", match.replace(/ /gm, "_"));
-                    const nestedListBody = match.replace(/^ {0,2}/gm, "");
+                    console.log("nested list match:", match.replace(/ /gm, "_"));
+                    const nestedListBody = match.replace(/^ {0,2}/gm, "").replace(/^\t/gm, "");
                     // console.log("nested list body:", nestedListBody.replace(/ /gm, "_"));
                     const nestedListItemMatches = nestedListBody.match(/(?:^ {0,1}- +)[\s\S]*?(?=\n(?=^ {0,1}- +))|(?:^ {0,1}- +)[\s\S]*/gm);
                     let nestedListItems = "";
                     
                     nestedListItemMatches.forEach((nestedListItem) => {
                         // console.log("nested list item:", nestedListItem.replace(/ /gm, "_"));
-                        const nestedListItemClean = nestedListItem.replace(/\n(?! {2,}- +)/gm, " ").replace(/^ {0,1}- +/g, "");
+                        const nestedListItemClean = nestedListItem.replace(/\n(?!(?: {2,}|\t*)- +)/gm, " ").replace(/^ {0,1}- +/g, "");
                         // console.log("nested list item clean:", nestedListItemClean.replace(/ /gm, "_"));
                         nestedListItems += `<li>${nestedListItemClean}</li>`;
                     });
