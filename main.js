@@ -8,10 +8,10 @@ const h3 = /^ {0,3}###\s(.*)$/gm;
 const h4 = /^ {0,3}####\s(.*)$/gm;
 const h5 = /^ {0,3}#####\s(.*)$/gm;
 const h6 = /^ {0,3}######\s(.*)$/gm;
-const altH1 = /(\w+)\n={1,} *$/gm;
-const altH2 = /(\w+)\n-{1,} *$/gm;
+// const altH1 = /(\w+)\n={1,} *$/gm;
+// const altH2 = /(\w+)\n-{1,} *$/gm;
 
-// const horizontalRule = /^(?:-|\*|_){3,}? *$/gm;
+const horizontalRule = /^(?:-|\*|_){3,}? *$/gm;
 
 // Image + Link
 const image = /!\[(.*?)\]\((.*?)\)/gm;
@@ -29,10 +29,10 @@ const orderedList = /^\d\. [\S\s]*?(?=^ *\n^(?!( *\d\.| *\n))|^- )|^\d\. [\S\s]*
 const unorderedList = /^- [\S\s]*?(?=^ *\n^(?!( *- | *\n))|^\d\. )|^- [\S\s]*/gm;
 
 // Paragraph
-const paragraph = /(^(?!<h2|<h1|<h3|<h4|<h5|<h6|<figure|<blockquote|<\/blockquote>|<p|<ol|<ul|( {4,}|\t)| *\n)[\S\s]+?(?=<blockquote>|^ *\n)|^(?!<h2|<h1|<h3|<h4|<h5|<h6|<figure|<blockquote|<\/blockquote>|<p|<ol|<ul|( {4,}|\t)| *\n)[\S\s]+)/gm;
+const paragraph = /(^(?!<h(?:1|2|3|4|6|r)>|<blockquote>|<\/blockquote>|<p>|<ol>|<ul>|( {4,}|\t)| *\n)[\S\s]+?(?=<h(?:1|2|3|4|6|r)>|<blockquote>|<\/blockquote>|<p>|<ol>|<ul>|^ *\n)|^(?!<h(?:1|2|3|4|6|r)>|<blockquote>|<\/blockquote>|<p>|<ol>|<ul>|( {4,}|\t)| *\n)[\S\s]+)/gm;
 
 // Codeblock
-const codeblock = /(^(?:( {4,}|\t))[\S\s]+?(?=\n<p>|<h2|<h1|<h3|<h4|<h5|<h6|<figure|<blockquote|<\/blockquote>|<ol|<ul|^ *\n)|^(?:( {4,}|\t))[\S\s]+)/gm;
+const codeblock = /(^(?:( {4,}|\t))[\S\s]+?(?=\n<p>|<h(?:1|2|3|4|5|6|r)>|<blockquote>|<\/blockquote>|<ol>|<ul>|^ *\n)|^(?:( {4,}|\t))[\S\s]+)/gm;
 
 // Inline elements
 
@@ -51,9 +51,10 @@ const italics2 = /_(.+?)_/gm;
 const strikethrough = /~~(.+?)~~/gm;
 
 // Code
-const code = /`(.*?)`/gm;
+const code = /`(.+?)`/gm;
 
 function parseMarkdown(mdText) {
+    const cache = { images: [], links: [], inlineCode: [] };
     let html;
 
     // Headings
@@ -63,22 +64,30 @@ function parseMarkdown(mdText) {
         .replace(h4, "<h4>$1</h4>")
         .replace(h5, "<h5>$1</h5>")
         .replace(h6, "<h6>$1</h6>")
-        .replace(altH1, "<h1>$1</h1>")
-        .replace(altH2, "<h2>$1</h2>");
-
-        // H1 and H2 with underlining
-        // .replace(h1, "<h1 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h1>")
-        // .replace(h2, "<h2 style='border-bottom: 1px solid lightgrey; margin-bottom: 0.5em;'>$1</h2>");
+        // .replace(altH1, "<h1>$1</h1>")
+        // .replace(altH2, "<h2>$1</h2>")
     
-    // html = html.replace(horizontalRule, "<hr>");
-    // First add to negative lookahead in paragraph, codeblock etc.
+    // Horizonzal rule
+    html = html.replace(horizontalRule, "<hr>");
 
     // Link + Image
-    html = html.replace(image, "<img src='$2' alt='$1'>");
+    // html = html.replace(image, "<img src='$2' alt='$1'>");
+    cache.images = [...html.matchAll(image)];
+    cache.images.forEach((image, index) => {
+        const id = Math.random();
+        image["id"] = id;
+        html = html.replace(image[0], `image-placeholder-${id}`);
+    });
 
-    html = html.replace(link, "<a href='$2'>$1</a>");
+    cache.links = [...html.matchAll(link)];
+    cache.links.forEach((link) => {
+        const id = Math.random();
+        link["id"] = id;
+        html = html.replace(link[0], `link-placeholder-${id}`);
+    })
+    // html = html.replace(link, "<a href='$2'>$1</a>");
 
-    // Extended feature
+    // Extended feature: Image with capture
     // html = html.replace(imageWithCaption, "<figure class='float-right'><img src='$3' alt='$1'></img><figcaption>$2</figcaption></figure>");
 
     // Blockquotes
@@ -135,10 +144,10 @@ function parseMarkdown(mdText) {
                     // console.log("nested list match:", match.replace(/ /gm, "_"));
                     const nestedListBody = match.replace(/^ {0,3}/gm, "").replace(/^\t/gm, "");
                     // console.log("nested list body:", nestedListBody.replace(/\t/gm, "_"));
-                    const nestedListItemMatches = nestedListBody.match(/(?:^ {0,2}\d\. {1,})[\s\S]*?(?=\n(?= {0,2}\d\. +))|(?:^ {0,2}\d\. {1,})[\s\S]*/gm);
+                    const nestedOLItemMatches = nestedListBody.match(/(?:^ {0,2}\d\. {1,})[\s\S]*?(?=\n(?= {0,2}\d\. +))|(?:^ {0,2}\d\. {1,})[\s\S]*/gm);
                     let nestedListItems = "";
                     
-                    nestedListItemMatches.forEach((nestedListItem) => {
+                    nestedOLItemMatches.forEach((nestedListItem) => {
                         // console.log("nested list item", nestedListItem.replace(/ /gm, "_"));
                         const nestedListItemClean = nestedListItem.replace(/\n(?!(?: {3,}|\t*)\d\. +)/gm, " ").replace(/^ {0,2}\d\. +/g, "");
                         // console.log("nested list item clean: ", nestedListItemClean.replace(/ /gm, "_"));
@@ -170,13 +179,13 @@ function parseMarkdown(mdText) {
             while (/(?:^ {2,}|\t)- +[\s\S]+?(?=\n(?=- )|<\/li>)|(?:^ {2,}|\t)- +[\s\S]+/m.test(itemWithNestedList)) {
                 if (loops >= 50) break;
                 itemWithNestedList = itemWithNestedList.replace(/(?:^ {2,}|\t)- +[\s\S]+?(?=\n(?=- )|<\/li>)|(?:^ {2,}|\t)- +[\s\S]+/m, (match) => {
-                    console.log("nested list match:", match.replace(/ /gm, "_"));
+                    // console.log("nested list match:", match.replace(/ /gm, "_"));
                     const nestedListBody = match.replace(/^ {0,2}/gm, "").replace(/^\t/gm, "");
                     // console.log("nested list body:", nestedListBody.replace(/ /gm, "_"));
-                    const nestedListItemMatches = nestedListBody.match(/(?:^ {0,1}- +)[\s\S]*?(?=\n(?=^ {0,1}- +))|(?:^ {0,1}- +)[\s\S]*/gm);
+                    const nestedULItemMatches = nestedListBody.match(/(?:^ {0,1}- +)[\s\S]*?(?=\n(?=^ {0,1}- +))|(?:^ {0,1}- +)[\s\S]*/gm);
                     let nestedListItems = "";
                     
-                    nestedListItemMatches.forEach((nestedListItem) => {
+                    nestedULItemMatches.forEach((nestedListItem) => {
                         // console.log("nested list item:", nestedListItem.replace(/ /gm, "_"));
                         const nestedListItemClean = nestedListItem.replace(/\n(?!(?: {2,}|\t*)- +)/gm, " ").replace(/^ {0,1}- +/g, "");
                         // console.log("nested list item clean:", nestedListItemClean.replace(/ /gm, "_"));
@@ -192,6 +201,23 @@ function parseMarkdown(mdText) {
         return `<ul>${listItems}</ul>\n`;
     });
 
+    // Exclude codeblocks from inline element parsing
+    // html = html.replace(/^(?! {4,})(.*)/gm, (match, lineText) => {
+    //     lineText = lineText.replace(bold, "<b>$1</b>");        
+    //     lineText = lineText.replace(bold2, "<b>$1</b>");
+    //     lineText = lineText.replace(italics, "<i>$1</i>");       
+    //     lineText = lineText.replace(italics2, "<i>$1</i>");
+    //     lineText = lineText.replace(strikethrough, "<s>$1</s>");
+    //     // lineText = lineText.replace(code, (match, group) => {
+    //     //     group = group.replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
+    //     //     return `<code>${group}</code>`
+    //     // });
+
+    //     // console.log("line text: ", lineText);
+
+    //     return lineText;
+    // });
+
     // console.log(html)
 
     // Paragraphs
@@ -205,32 +231,61 @@ function parseMarkdown(mdText) {
         return `<p>${paragraphClean}</p>\n`;
     });
 
-    // Exclude codeblocks from inline element parsing
-    html = html.replace(/^(?! {4,})(.*)/gm, (match, lineText) => {
-        
-        lineText = lineText.replace(bold, "<b>$1</b>");        
-        lineText = lineText.replace(bold2, "<b>$1</b>");
-        lineText = lineText.replace(italics, "<i>$1</i>");       
-        lineText = lineText.replace(italics2, "<i>$1</i>");
-        lineText = lineText.replace(strikethrough, "<s>$1</s>");
-        lineText = lineText.replace(code, (match, group) => {
-            group = group.replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
-            return `<code>${group}</code>`
-        });
-        // console.log("line text: ", lineText);
-
-        return lineText;
-    });
-
     // Codeblock
-    html = html.replace(codeblock, (match) => {
-        // console.log("codeblock match: ", match);
-        const trimmedMatch = match.replace(/ {4,}|\t/gm, "");
-        const escaped = trimmedMatch.replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
-        return `<pre><code>${escaped}</code></pre>`;
+    // html = html.replace(codeblock, (match) => {
+    //     // console.log("codeblock match: ", match);
+    //     const trimmedMatch = match.replace(/ {4,}|\t/gm, "");
+    //     const escaped = trimmedMatch.replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
+    //     return `<pre><code>${escaped}</code></pre>`;
+    // });
+    cache.codeblocks = [...html.matchAll(codeblock)];
+    cache.codeblocks.forEach((codeblock) => {
+        console.log(codeblock);
+        const id = Math.random();
+        codeblock["id"] = id;
+        html = html.replace(codeblock[0], `codeblock-placeholder-${id}`);
     });
-    
-    console.log(html);
+
+    // Inline Code
+    cache.inlineCode = [...html.matchAll(code)];
+    cache.inlineCode.forEach((inlineCode) => {
+        const id = Math.random();
+        inlineCode["id"] = id;
+        inlineCode[1] = inlineCode[1].replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
+        html = html.replace(inlineCode[0], `inline-code-placeholder-${id}`);
+    });
+
+    // Other inline elements
+    html = html.replace(bold, "<b>$1</b>")
+        .replace(bold2, "<b>$1</b>")
+        .replace(italics, "<i>$1</i>")
+        .replace(italics2, "<i>$1</i>")
+        .replace(strikethrough, "<s>$1</s>");
+
+    cache.links.forEach((link) => {
+        if (link) {
+            html = html.replace(`link-placeholder-${link.id}`, `<a href=${link[2]}>${link[1]}</a>`);
+        }
+    })
+    cache.images.forEach((image) => {
+        if (image) {
+            html = html.replace(`image-placeholder-${image.id}`, `<img alt=${image[1]} src=${image[2]}>`);
+        }
+    })
+    cache.inlineCode.forEach((inlineCode) => {
+        if (inlineCode) {
+            html = html.replace(`inline-code-placeholder-${inlineCode.id}`, `<code>${inlineCode[1]}</code>`);
+        }
+    })
+    cache.codeblocks.forEach((codeblock) => {
+        if (codeblock) {
+            console.log(codeblock.id)
+            codeblock[0] = codeblock[0].replace(/ {4,}|\t/gm, "").replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
+            html = html.replace(`codeblock-placeholder-${codeblock.id}`, `<pre><code>${codeblock[0]}</code></pre>`);
+        }
+    })
+
+    // console.log(html);
 
     return html;
 }
