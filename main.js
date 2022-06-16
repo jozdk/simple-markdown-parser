@@ -80,8 +80,8 @@ function parseMarkdown(mdText) {
     html = html.replace(blockquote, (match) => {
         // console.log("blockquote match: ", match);
         const blockQuoteText = match.replace(/^>{1}/gm, "").replace(/^ /gm, "");
-        // console.log("cleaned up blockquote match: ", blockQuoteText.replace(/\n/gm, "LINEFEED"));
-        const blockquoteWithParagraphs = blockQuoteText.replace(/(^(?!>)[\S\s]+?(?=>{1,}|^\n)|^(?!>)[\S\s]+)/gm, (match) => {
+        // console.log("cleaned up blockquote match: ", blockQuoteText);
+        const blockquoteWithParagraphs = blockQuoteText.replace(/(^(?!>)[\S\s]+?(?=^>{1,}|^\n)|^(?!>)[\S\s]+)/gm, (match) => {
             // console.log("paragraph match: ", match.replace(/\n/gm, "LINEFEED"));
             const blockquoteParagraphOneline = match.trim().replace(/\n/gm, " ");
             // console.log("paragraph oneline: ", blockquoteParagraphOneline.replace(/\n/gm, "LINEFEED"));
@@ -352,3 +352,135 @@ editor.addEventListener("input", (event) => {
         }
     }
 });
+
+const sampleText = `# Simple Markdown Parser
+
+This is a simple markdown parser and previewer.
+
+![Markdown](https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Markdown-mark-solid.svg/208px-Markdown-mark-solid.svg.png)
+
+- Write some markdown on the left
+  - Check back with the [Readme](https://github.com/jozdk/simple-markdown-parser) for markdown syntax rules
+- See some **rich text** on the right
+- Have fun 😉
+
+## Features
+
+### Headings
+
+# Heading Level 1
+## Heading Level 2
+### Heading Level 3
+#### Heading Level 4
+##### Heading Level 5
+###### Heading Level 6
+
+### Paragraphs
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Adipiscing tristique risus nec feugiat in fermentum posuere urna nec. Sem et tortor consequat id porta. Mollis aliquam ut porttitor leo.
+
+Pellentesque habitant morbi tristique senectus et netus et. Nulla malesuada pellentesque elit eget gravida cum sociis natoque. Ullamcorper a lacus vestibulum sed arcu.
+
+Laoreet id donec ultrices tincidunt arcu. Fermentum et sollicitudin ac orci phasellus egestas. Quis varius quam quisque id diam vel. Integer enim neque volutpat ac tincidunt vitae semper quis.
+
+### Linebreaks
+
+Linebreaks are created with two trailing spaces at the end of a line.  
+Like so.
+
+### Emphasis
+
+**This text will be bold**  
+__This text will also be bold__
+
+*This text will be italic*  
+_This text will also be italic_
+
+***For really important matters, you can combine them***.
+
+Or you can ~~strike stuff through~~.
+
+### Lists
+
+#### Unordered Lists
+
+- item
+- item
+  - nested item
+  - nested item
+    - nest away
+  - nested item
+- item
+
+#### Ordered Lists
+
+1. item
+2. item
+   1. nested item
+   2. nested item
+      1. nest away
+   3. nested item
+3. item
+
+### Blockquotes
+
+> Using Markdown is different than using a WYSIWYG editor. In an application like Microsoft Word, 
+> you click buttons to format words and phrases, and the changes are visible immediately. 
+> Markdown isn’t like that. When you create a Markdown-formatted file, you add Markdown syntax to 
+> the text to indicate which words and phrases should look different.
+>
+> According to Gruber, Markdown syntax is designed to be readable and unobtrusive, so the text in
+> Markdown files can be read even if it isn’t rendered.
+> 
+>> The overriding design goal for Markdown’s formatting syntax is to make it as readable as 
+>> possible. The idea is that a Markdown-formatted document should be publishable as-is, as plain 
+>> text, without looking like it’s been marked up with tags or formatting instructions.
+>>
+>> The best way to get a feel for Markdown’s formatting syntax is simply to look at a Markdown 
+>> formatted document. For example, you can view the Markdown source for the article text on this 
+>> page here: http://daringfireball.net/projects/markdown/index.text
+
+### Code
+
+#### Inline Code
+
+` + '`<script type="module" src="main.js"></script>`' + `
+
+` + '`/var/log/**/*.log`' + `
+
+` + `#### Codeblocks
+
+	const array1 = [1, 2, 3, 4];
+
+	// 0 + 1 + 2 + 3 + 4
+	const initialValue = 0;
+	const sumWithInitial = array1.reduce(
+	  (previousValue, currentValue) => previousValue + currentValue,
+	  initialValue
+	);
+
+	console.log(sumWithInitial);
+	// expected output: 10
+
+### Links
+
+This is a link to [Markdown's Wikipedia page](https://en.wikipedia.org/wiki/Markdown).
+
+You can also just drop the URL: https://en.wikipedia.org/wiki/Markdown and it gets converted to a link.
+
+Or add a link to an image: [![Markdown Image](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Markdown-mark-4th.svg/52px-Markdown-mark-4th.svg.png)](https://en.wikipedia.org/wiki/Markdown)
+
+### Images 
+
+![Painting](https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Hilma_af_Klint_Svanen.jpg/240px-Hilma_af_Klint_Svanen.jpg)
+
+### Horizontal Rules
+
+***
+
+---
+
+___`;
+
+editor.value = sampleText;
+preview.innerHTML = parseMarkdown(sampleText);
