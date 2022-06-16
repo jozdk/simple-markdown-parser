@@ -323,35 +323,31 @@ editor.addEventListener("input", (event) => {
         const html = parseMarkdown(event.target.value)
         preview.innerHTML = html;
     } catch (err) {
-        const referral = document.createElement("p");
+            const referral = document.createElement("p");
             const link = document.createElement("a");
-            link.textContent = "https:/github.com/jozdk/simple-markdown-parser";
-            link.href = "https:/github.com/jozdk/simple-markdown-parser";
+            link.textContent = "https://github.com/jozdk/simple-markdown-parser";
+            link.href = "https://github.com/jozdk/simple-markdown-parser";
             referral.style.color = "red";
             referral.append("For a complete list of supported syntax, go to ", link);
-        if (err.message === "nestedOLItemMatches is null") {
-            preview.innerHTML = "";
             const alert = document.createElement("h2");
-            alert.textContent = "Sorry, your ordered list could not be parsed";
             alert.style.color = "red";
             const message = document.createElement("p");
-            message.textContent = "Please make sure that list items are not indented by more than 5 spaces per nesting level"
             message.style.color = "red";
+            preview.innerHTML = "";
+        if (err.message === "nestedOLItemMatches is null") {
+            alert.textContent = "Sorry, your ordered list could not be parsed";
+            message.textContent = "Please make sure that list items are not indented by more than 5 spaces per nesting level";
             preview.append(alert, message, referral);
         } else if (err.message === "nestedULItemMatches is null") {
-            preview.innerHTML = "";
-            const alert = document.createElement("h2");
             alert.textContent = "Sorry, your unordered list could not be parsed";
-            alert.style.color = "red";
-            const message = document.createElement("p");
             message.textContent = "Please make sure that list items are not indented by more than 4 spaces per nesting level"
-            message.style.color = "red";
             preview.append(alert, message, referral);
+        } else if (err.message === "Invalid regular expression: invalid group specifier name") {
+            alert.textContent = "Sorry, this application does not run in this Browser";
+            message.textContent = "It is likely that you are running this application in Safari or another Browser that does not support lookbehind assertions in regular expressions. Please consider using another Browser (e.g. Chrome, Firefox) or check back, when your Browser has adopted the new Regexp features of ECMAScript 2018.";
+            preview.append(alert, message);
         } else {
-            preview.innerHTML = "";
-            const alert = document.createElement("h2");
             alert.textContent = "Sorry, your markdown text could not be parsed";
-            alert.style.color = "red";
             preview.append(alert, referral);
         }
     }
