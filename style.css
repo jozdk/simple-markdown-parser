@@ -95,6 +95,10 @@ blockquote {
     border-left: .25em solid #dfe2e5;
 }
 
+blockquote a {
+    color: #6a737d;
+}
+
 code {
     padding: .15em .4em;
     margin: 0;

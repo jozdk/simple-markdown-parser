@@ -16,6 +16,9 @@ const horizontalRule = /^(?:-|\*|_){3,}? *$/gm;
 // Image + Link
 const image = /!\[(.*?)\]\((.*?)\)/gm;
 const link = /(?<!!)\[(.*?)\]\((.*?)\)/gm;
+const link2 = /\b(?:(https{0,1}:\/\/)|(www\.))\w.*?(?=\s|\)|\(|<|>|\\|\{|\}|`|;|,|\*|\||"|'|$|(?:\.|:|-|#)(?=$|[^\w]))/gm;
+//const link = /(?:\b((?:(https{0,1}:\/\/)|(www\.))\w.*?(?=\s|\)|\(|<|>|\\|\{|\}|`|;|$))|((?<!!)\[(.*?)\]\((.*?)\)))/gm;
+
 // Extended feature: image with caption: ![alt text|figcaption text](URL)
 // const imageWithCaption = /!\[(.*?)\|(.*?)\]\((.*?)\)/gm;
 
@@ -32,7 +35,10 @@ const unorderedList = /^- [\S\s]*?(?=^ *\n^(?!( *- | *\n))|^\d\. )|^- [\S\s]*/gm
 const paragraph = /(^(?!<h(?:1|2|3|4|6|r)>|<blockquote>|<\/blockquote>|<p>|<ol>|<ul>|( {4,}|\t)| *\n)[\S\s]+?(?=<h(?:1|2|3|4|6|r)>|<blockquote>|<\/blockquote>|<p>|<ol>|<ul>|^ *\n)|^(?!<h(?:1|2|3|4|6|r)>|<blockquote>|<\/blockquote>|<p>|<ol>|<ul>|( {4,}|\t)| *\n)[\S\s]+)/gm;
 
 // Codeblock
-const codeblock = /(^(?:( {4,}|\t))[\S\s]+?(?=\n<p>|<h(?:1|2|3|4|5|6|r)>|<blockquote>|<\/blockquote>|<ol>|<ul>|^ *\n)|^(?:( {4,}|\t))[\S\s]+)/gm;
+// Version that only works, if paragraphs are matched before (which they are, but still):
+const codeblock = /(^(?:( {4,}|\t))[^\s]+[\S\s]+?(?=\n<p>|<h(?:1|2|3|4|5|6|r)>|<blockquote>|<\/blockquote>|<ol>|<ul>|^ *\n(?! {4,}|\t))|^(?:( {4,}|\t))[^\s]+[\S\s]+)/gm;
+// Version that works even if paragraphs don't match first, but since they need to go first for other reasons, as well, this longer regex might not be necessary:
+//const codeblock = /(^(?:( {4,}|\t))[^\s]+[\S\s]+?(?=\n<p>|<h(?:1|2|3|4|5|6|r)>|<blockquote>|<\/blockquote>|<ol>|<ul>|^\s*?\n(?! {4,}|\t)|^(?!(?: {4,}|\t|(?: *|\t)\n)))|^(?:( {4,}|\t))[^\s]+[\S\s]+)/gm;
 
 // Inline elements
 
@@ -54,7 +60,7 @@ const strikethrough = /~~(.+?)~~/gm;
 const code = /`(.+?)`/gm;
 
 function parseMarkdown(mdText) {
-    const cache = { images: [], links: [], inlineCode: [] };
+    const cache = {};
     let html;
 
     // Headings
@@ -69,26 +75,6 @@ function parseMarkdown(mdText) {
     
     // Horizonzal rule
     html = html.replace(horizontalRule, "<hr>");
-
-    // Link + Image
-    // html = html.replace(image, "<img src='$2' alt='$1'>");
-    cache.images = [...html.matchAll(image)];
-    cache.images.forEach((image, index) => {
-        const id = Math.random();
-        image["id"] = id;
-        html = html.replace(image[0], `image-placeholder-${id}`);
-    });
-
-    cache.links = [...html.matchAll(link)];
-    cache.links.forEach((link) => {
-        const id = Math.random();
-        link["id"] = id;
-        html = html.replace(link[0], `link-placeholder-${id}`);
-    })
-    // html = html.replace(link, "<a href='$2'>$1</a>");
-
-    // Extended feature: Image with capture
-    // html = html.replace(imageWithCaption, "<figure class='float-right'><img src='$3' alt='$1'></img><figcaption>$2</figcaption></figure>");
 
     // Blockquotes
     html = html.replace(blockquote, (match) => {
@@ -240,7 +226,7 @@ function parseMarkdown(mdText) {
     // });
     cache.codeblocks = [...html.matchAll(codeblock)];
     cache.codeblocks.forEach((codeblock) => {
-        console.log(codeblock);
+        // console.log(codeblock);
         const id = Math.random();
         codeblock["id"] = id;
         html = html.replace(codeblock[0], `codeblock-placeholder-${id}`);
@@ -255,6 +241,34 @@ function parseMarkdown(mdText) {
         html = html.replace(inlineCode[0], `inline-code-placeholder-${id}`);
     });
 
+    // Link + Image
+    // html = html.replace(image, "<img src='$2' alt='$1'>");
+    cache.images = [...html.matchAll(image)];
+    cache.images.forEach((image, index) => {
+        const id = Math.random();
+        image["id"] = id;
+        html = html.replace(image[0], `image-placeholder-${id}`);
+    });
+
+    cache.links = [...html.matchAll(link)];
+    cache.links.forEach((link) => {
+        const id = Math.random();
+        link["id"] = id;
+        html = html.replace(link[0], `link-placeholder-${id}`);
+    })
+    
+    cache.links2 = [...html.matchAll(link2)];
+    cache.links2.forEach((link) => {
+        const id = Math.random();
+        link["id"] = id;
+        html = html.replace(link[0], `link2-placeholder-${id}`);
+    })
+
+    // html = html.replace(link, "<a href='$2'>$1</a>");
+
+    // Extended feature: Image with capture
+    // html = html.replace(imageWithCaption, "<figure class='float-right'><img src='$3' alt='$1'></img><figcaption>$2</figcaption></figure>");
+
     // Other inline elements
     html = html.replace(bold, "<b>$1</b>")
         .replace(bold2, "<b>$1</b>")
@@ -263,8 +277,22 @@ function parseMarkdown(mdText) {
         .replace(strikethrough, "<s>$1</s>");
 
     cache.links.forEach((link) => {
-        if (link) {
-            html = html.replace(`link-placeholder-${link.id}`, `<a href=${link[2]}>${link[1]}</a>`);
+        // if (link[1]) {
+        //     if (link[2]) {
+        //         html = html.replace(`link-placeholder-${link.id}`, `<a href=${link[1]}>${link[1]}</a>`);
+        //     } else if (link[3]) {
+        //         html = html.replace(`link-placeholder-${link.id}`, `<a href="http://${link[1]}">${link[1]}</a>`);
+        //     }
+        // } else {
+        //     html = html.replace(`link-placeholder-${link.id}`, `<a href=${link[6]}>${link[5]}</a>`);
+        // }
+        html = html.replace(`link-placeholder-${link.id}`, `<a href=${link[2]}>${link[1]}</a>`);
+    })
+    cache.links2.forEach((link) => {
+        if (link[1]) {
+            html = html.replace(`link2-placeholder-${link.id}`, `<a href=${link[0]}>${link[0]}</a>`);
+        } else if (link[2]) {
+            html = html.replace(`link2-placeholder-${link.id}`, `<a href=http://${link[0]}>${link[0]}</a>`);
         }
     })
     cache.images.forEach((image) => {
@@ -279,13 +307,12 @@ function parseMarkdown(mdText) {
     })
     cache.codeblocks.forEach((codeblock) => {
         if (codeblock) {
-            console.log(codeblock.id)
             codeblock[0] = codeblock[0].replace(/ {4,}|\t/gm, "").replace(/(<)/gm, "&lt;").replace(/(>)/gm, "&gt;");
             html = html.replace(`codeblock-placeholder-${codeblock.id}`, `<pre><code>${codeblock[0]}</code></pre>`);
         }
     })
 
-    // console.log(html);
+    //console.log(html);
 
     return html;
 }
