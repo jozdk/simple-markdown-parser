@@ -16,7 +16,7 @@ const horizontalRule = /^(?:-|\*|_){3,}? *$/gm;
 // Image + Link
 const image = /!\[(.*?)\]\((.*?)\)/gm;
 const link = /(?<!!)\[(.*?)\]\((.*?)\)/gm;
-const link2 = /\b(?:(https{0,1}:\/\/)|(www\.))\w.*?(?=\s|\)|\(|<|>|\\|\{|\}|`|;|,|\*|\||"|'|$|(?:\.|:|-|#)(?=$|[^\w]))/gm;
+const link2 = /\b(?:(https{0,1}:\/\/)|(www\.))\w.*?(?=\s|\)|\(|<|>|\\|\{|\}|`|;|,|\*|\||"|'|$|(?:\.|:|-|#)(?=$|[^\w%]))/gm;
 //const link = /(?:\b((?:(https{0,1}:\/\/)|(www\.))\w.*?(?=\s|\)|\(|<|>|\\|\{|\}|`|;|$))|((?<!!)\[(.*?)\]\((.*?)\)))/gm;
 
 // Extended feature: image with caption: ![alt text|figcaption text](URL)
@@ -81,7 +81,7 @@ function parseMarkdown(mdText) {
         // console.log("blockquote match: ", match);
         const blockQuoteText = match.replace(/^>{1}/gm, "").replace(/^ /gm, "");
         // console.log("cleaned up blockquote match: ", blockQuoteText);
-        const blockquoteWithParagraphs = blockQuoteText.replace(/(^(?!>)[\S\s]+?(?=^>{1,}|^\n)|^(?!>)[\S\s]+)/gm, (match) => {
+        const blockquoteWithParagraphs = blockQuoteText.replace(/(^(?!>|\n)[\S\s]+?(?=^>{1,}|^\n)|^(?!>|\n)[\S\s]+)/gm, (match) => {
             // console.log("paragraph match: ", match.replace(/\n/gm, "LINEFEED"));
             const blockquoteParagraphOneline = match.trim().replace(/\n/gm, " ");
             // console.log("paragraph oneline: ", blockquoteParagraphOneline.replace(/\n/gm, "LINEFEED"));
@@ -97,13 +97,13 @@ function parseMarkdown(mdText) {
                 // console.log("nested blockquote match: ", match);
                 const nestedBlockquoteText = match.replace(/^>{1}/gm, "").replace(/^ /gm, "");
                 // console.log("cleaned up blockquote match: ", nestedBlockquoteText);
-                const nestedBlockquoteParagraphs = nestedBlockquoteText.replace(/(^(?!>)[\S\s]+?(?=>{1,}|^\n)|^(?!>)[\S\s]+)/gm, (match) => {
+                const nestedBlockquoteParagraphs = nestedBlockquoteText.replace(/(^(?!>|\n)[\S\s]+?(?=^>{1,}|^\n)|^(?!>|\n)[\S\s]+)/gm, (match) => {
                     // console.log("nested bockquote paragraph match: ", match);
                     const nestedBlockquoteParagraphOneline = match.trim().replace(/\n/gm, " ");
                     // console.log("nested blockquote paragraph oneline: ", nestedBlockquoteParagraphOneline);
                     return `<p>${nestedBlockquoteParagraphOneline}</p>\n`;
                 })
-                return `<blockquote>${nestedBlockquoteParagraphs}</blockquote>`;
+                return `<blockquote>${nestedBlockquoteParagraphs}</blockquote>\n`;
             });
 
             n++;
