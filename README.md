@@ -2,6 +2,8 @@
 
 Parses the basic markdown syntax and displays it live in a preview window on the side. Advanced markdown features (e.g. tables) are not supported.
 
+Demo: [https://jozdk.github.io/simple-markdown-parser](https://jozdk.github.io/simple-markdown-parser/)
+
 ![Screenshot](documentation/smp-screenshot.png)
 
 ## Set-up
@@ -10,7 +12,7 @@ This is the most minimal set-up for a markdown parser: a single JavaScript file 
 
 ## Use cases
 
-On account of its utmost simplicity, this markdown parser is not exactly built for complicated edge cases or too arbitrary a syntax pattern. But as long as you just want to check out some basic markdown (and don't mind adhering to slightly stricter syntax rules, when it comes to nesting your ordered and unordered lists --> see below), you're good to go for a snappy :zap: markdown live preview :zap:
+On account of its utmost simplicity, this markdown parser is not built for complicated edge cases or too arbitrary a syntax pattern. But as long as you just want to check out some basic markdown (and don't mind adhering to slightly stricter syntax rules, when it comes to nesting your ordered and unordered lists --> see below), you're good to go for a snappy :zap: markdown live preview :zap:
 
 ## Usage
 
